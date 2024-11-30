@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/C:/Users/anton/Documents/GitHub/servicioPaqueteria/src/java/pojo/Cliente.java</file>
+            <file>file:/C:/Users/anton/Documents/GitHub/servicioPaqueteria/src/java/mybatis/mappers/ClientesMapper.xml</file>
+            <file>file:/C:/Users/anton/Documents/GitHub/servicioPaqueteria/src/java/mybatis/mappers/ColaboradoresMapper.xml</file>
+            <file>file:/C:/Users/anton/Documents/GitHub/servicioPaqueteria/src/java/ws/WSColaborador.java</file>
+            <file>file:/C:/Users/anton/Documents/GitHub/servicioPaqueteria/src/java/mybatis/mybatis-config.xml</file>
+            <file>file:/C:/Users/anton/Documents/GitHub/servicioPaqueteria/src/java/ws/WSCliente.java</file>
+            <file>file:/C:/Users/anton/Documents/GitHub/servicioPaqueteria/src/java/dominio/ImpCliente.java</file>
+            <file>file:/C:/Users/anton/Documents/GitHub/servicioPaqueteria/src/java/dominio/ImpColaborador.java</file>
+        </group>
+    </open-files>
+</project-private>
