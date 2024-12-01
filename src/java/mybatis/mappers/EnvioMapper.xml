@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="envio">
+
+    <insert id="registrarDireccion" parameterType="hashmap">
+        INSERT INTO direccion (tipo, calle, numero, colonia, codigoPostal, ciudad, estado, idEnvio)
+        VALUES (#{tipo}, #{calle}, #{numero}, #{colonia}, #{codigoPostal}, #{ciudad}, #{estado}, #{idEnvio})
+    </insert>
+    <!-- Registrar un envío -->
+    <insert id="registrarEnvio" parameterType="pojo.Envio" useGeneratedKeys="true" keyProperty="idEnvio">
+        INSERT INTO envio (numeroGuia, costoEnvio, comentario, idColaborador, idCliente, idSeguimiento)
+        VALUES (#{numeroGuia}, #{costoEnvio}, #{comentario}, #{idColaborador}, #{idCliente}, #{idSeguimiento})
+    </insert>
+    
+    <select id="verificarNumeroGuia" resultType="string">
+        SELECT numeroGuia FROM envio WHERE numeroGuia = #{numeroGuia}
+    </select>
+
+
+</mapper>

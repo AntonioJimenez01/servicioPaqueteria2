@@ -51,7 +51,7 @@ public class WSCliente {
                 && cliente.getNombre().length() <= 50) {
                 return ImpCliente.registrarCliente(cliente);
             } else {
-                return new Mensaje(true, "Correo, teléfono, nombre o contraseña faltantes o inválidos");
+                throw new BadRequestException("NoPersonal inválido o vacío.");//return new Mensaje(true, "Correo, teléfono, nombre o contraseña faltantes o inválidos");
             }
         } catch (Exception e) {
             e.printStackTrace();

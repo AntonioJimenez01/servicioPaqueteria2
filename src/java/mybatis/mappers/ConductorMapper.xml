@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="conductor">
+
+    <update id="asignarUnidad" parameterType="map">        
+        UPDATE unidad u
+        JOIN colaborador c ON c.noPersonal = #{noPersonal}
+        SET u.idColaborador = c.idColaborador
+        WHERE u.numeroInterno = #{numeroInterno} 
+        AND u.situacion = 'activo';
+    </update>
+    
+    <update id="desasignarUnidad" parameterType="int">        
+        UPDATE unidad
+        SET idColaborador = NULL
+        WHERE idColaborador = #{idColaborador} 
+    </update>
+    
+    <select id="obtenerUnidadColaborador" parameterType="int" resultType="String">
+        SELECT numeroInterno 
+        FROM unidad 
+        WHERE idColaborador = #{idColaborador}
+    </select>
+    
+    <select id="verListaEnvios" parameterType="String" resultType="pojo.Envio">
+        SELECT
+            e.numeroGuia            
+        FROM
+            envio e
+        INNER JOIN
+            colaborador c ON e.idColaborador = c.idColaborador
+        WHERE
+            c.noPersonal = #{noPersonal}
+    </select>
+    
+    <select id="verDetalleEnvio" parameterType="map" resultType="pojo.Envio">
+        SELECT
+            e.numeroGuia,
+            e.costoEnvio,
+            e.comentario,
+            e.idColaborador,
+            e.idCliente,
+            e.idSeguimiento,
+            e.idDireccion
+        FROM
+            envio e       
+        WHERE
+            e.numeroGuia = #{numeroGuia} and e.idColaborador = #{idColaborador}
+    </select>
+
+</mapper>

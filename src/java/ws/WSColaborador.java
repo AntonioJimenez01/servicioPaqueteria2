@@ -63,7 +63,7 @@ public class WSColaborador {
                 && colaborador.getContraseña() != null && !colaborador.getContraseña().isEmpty()) {
                 return ImpColaborador.registrarColaborador(colaborador);
             } else {
-                return new Mensaje(true, "Número de personal y/o password faltantes o incorrectos");
+                throw new BadRequestException("NoPersonal inválido o vacío.");//return new Mensaje(true, "Número de personal y/o password faltantes o incorrectos");
             }
         } catch (Exception e) {
             e.printStackTrace();
