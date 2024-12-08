@@ -1,5 +1,7 @@
 package pojo;
-//hmbmbmn
+
+import java.util.List; // Importa List
+
 public class Cliente {
     private Integer idCliente;
     private String nombre;
@@ -7,19 +9,26 @@ public class Cliente {
     private String apellidoMaterno;
     private String telefono;
     private String correo;
+    private Direccion direccion;
+    private List<Direccion> direcciones; 
 
+    // Constructor sin direcciones
     public Cliente() {
     }
 
-    public Cliente(Integer idCliente, String nombre, String apellidoPaterno, String apellidoMaterno, String telefono, String correo) {
+    // Constructor con direcciones
+    public Cliente(Integer idCliente, String nombre, String apellidoPaterno, String apellidoMaterno, String telefono, String correo, List<Direccion> direcciones) {
         this.idCliente = idCliente;
         this.nombre = nombre;
         this.apellidoPaterno = apellidoPaterno;
         this.apellidoMaterno = apellidoMaterno;
         this.telefono = telefono;
         this.correo = correo;
+        this.direccion = direccion;
+        this.direcciones = direcciones;
     }
 
+    // Getters y setters
     public Integer getIdCliente() {
         return idCliente;
     }
@@ -67,6 +76,20 @@ public class Cliente {
     public void setCorreo(String correo) {
         this.correo = correo;
     }
+
+    public List<Direccion> getDirecciones() {
+        return direcciones;
+    }
+
+    public void setDirecciones(List<Direccion> direcciones) {
+        this.direcciones = direcciones;
+    }
     
-    
+    public Direccion getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(Direccion direccion) {
+        this.direccion = direccion;
+    }
 }

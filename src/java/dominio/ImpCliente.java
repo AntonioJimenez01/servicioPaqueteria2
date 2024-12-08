@@ -2,120 +2,159 @@ package dominio;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import mybatis.MyBatisUtil;
 import org.apache.ibatis.session.SqlSession;
 import pojo.Cliente;
+import pojo.Direccion;
 import pojo.Mensaje;
 
 public class ImpCliente {
     
     public static List<Cliente> obtenerTodosLosClientes() {
-        List<Cliente> cliente = null;
+        List<Cliente> listaClientes = null;
         SqlSession conexionBD = MyBatisUtil.obtenerConexion();
+        Mensaje mensaje = new Mensaje ();
+    
         if (conexionBD != null) {
             try {
-                cliente = conexionBD.selectList("cliente.obtenerCliente");
+                // Primero, obtenemos todos los clientes
+                listaClientes = conexionBD.selectList("cliente.obtenerClientes");
+            
+                // Luego, para cada cliente, obtenemos sus direcciones
+                for (Cliente cliente : listaClientes) {
+                    List<Direccion> direccion = conexionBD.selectList("cliente.obtenerDireccionesPorCliente", cliente.getIdCliente());
+                    cliente.setDirecciones(direccion); // Asociamos las direcciones al cliente
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
                 conexionBD.close();
             }
         } else {
-            System.out.println("No se pudo establecer la conexión con la base de datos.");
+            mensaje.setError(true);
+            mensaje.setMensaje("No se pudo establecer la conexión con la base de datos.");
         }
-        return cliente;
-    }
     
-    public static Mensaje registrarCliente (Cliente cliente) {
-        Mensaje msj = new Mensaje();
-        SqlSession conexionBD = MyBatisUtil.obtenerConexion();
+    return listaClientes;    }
+    
+    public static Mensaje registrarCliente (Cliente cliente, Direccion direccion) {
+         SqlSession conexionBD = MyBatisUtil.obtenerConexion();
+        Mensaje mensaje = new Mensaje();
+        
         if (conexionBD != null) {
             try {
-                int filasAfectadas = conexionBD.insert("cliente.registrarCliente", cliente);
+                // Registrar cliente
+                conexionBD.insert("cliente.insertarCliente", cliente);
+                
+                // Usar el ID generado del cliente para registrar la dirección
+                direccion.setIdCliente(cliente.getIdCliente());
+                conexionBD.insert("cliente.insertarDireccion", direccion);
+                
+                // Confirmar la transacción
                 conexionBD.commit();
-                if (filasAfectadas > 0) {
-                    msj.setError(false);
-                    msj.setMensaje("El Cliente " + cliente.getNombre() + " " +
-                            cliente.getApellidoPaterno() + " " + cliente.getApellidoMaterno() +
-                            ", fue registrado con éxito.");
-                } else {
-                    msj.setError(true);
-                    msj.setMensaje("La información del cliente no se pudo ser registrado. :c");
-                }
+                
+                mensaje.setError(false);
+                mensaje.setMensaje("Cliente y dirección registrados correctamente.");
             } catch (Exception e) {
-                msj.setError(true);
-                msj.setMensaje(e.getMessage());
-            }
-        } else {
-            msj.setError(true);
-            msj.setMensaje("Por el momento el servicio no está disponible.");
-        }
-        return msj;
-    }
-    
-        public static Mensaje editarCliente(Cliente cliente) {
-        Mensaje msj = new Mensaje();
-        SqlSession conexionBD = MyBatisUtil.obtenerConexion();
-
-        if (conexionBD != null) {
-            try {
-                int filasAfectadas = conexionBD.update("cliente.editarCliente", cliente);
-                conexionBD.commit();
-
-                if (filasAfectadas > 0) {
-                    msj.setError(false);
-                    msj.setMensaje("El cliente con el ID " + cliente.getIdCliente()+ " fue actualizado con éxito.");
-                } else {
-                    msj.setError(true);
-                    msj.setMensaje("No se encontró el cliente o no se pudo actualizar.");
-                }
-            } catch (Exception e) {
-                msj.setError(true);
-                msj.setMensaje("Error al actualizar cliente: " + e.getMessage());
+                // Revertir transacciones en caso de error
+                conexionBD.rollback();
+                mensaje.setError(true);
+                mensaje.setMensaje("Error al registrar el cliente: " + e.getMessage());
+                e.printStackTrace();
             } finally {
                 conexionBD.close();
             }
         } else {
-            msj.setError(true);
-            msj.setMensaje("No se pudo establecer la conexión con la base de datos.");
+            mensaje.setError(true);
+            mensaje.setMensaje("No se pudo establecer conexión con la base de datos.");
         }
-
-        return msj;
-    }
         
-       public static Mensaje eliminarCliente (Integer idCliente){
-        Mensaje mensaje = new Mensaje();
+        return mensaje;
+    }    
+    
+    public static Mensaje actualizarCliente(Cliente cliente, List<Direccion> direcciones) {
+    SqlSession conexionBD = MyBatisUtil.obtenerConexion();
+    Mensaje mensaje = new Mensaje();
+
+    if (conexionBD != null) {
+        try {
+            // Actualizar cliente
+            conexionBD.update("cliente.actualizarCliente", cliente);
+
+            // Actualizar direcciones existentes
+            for (Direccion direccion : direcciones) {
+                if (direccion.getIdDireccion() != null) {
+                    // Si la dirección tiene un ID, actualízala
+                    conexionBD.update("cliente.actualizarDireccion", direccion);
+                } else {
+                    // Si la dirección no tiene ID, insertarla como nueva
+                    direccion.setIdCliente(cliente.getIdCliente());
+                    conexionBD.insert("cliente.insertarDireccion", direccion);
+                }
+            }
+
+            // Confirmar la transacción
+            conexionBD.commit();
+
+            mensaje.setError(false);
+            mensaje.setMensaje("Cliente y direcciones actualizados correctamente.");
+        } catch (Exception e) {
+            // Revertir transacciones en caso de error
+            conexionBD.rollback();
+            mensaje.setError(true);
+            mensaje.setMensaje("Error al actualizar el cliente: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            conexionBD.close();
+        }
+    } else {
         mensaje.setError(true);
-        SqlSession conexionBD = MyBatisUtil.obtenerConexion();
-        if(conexionBD!=null){
-            try {
-                Cliente clienteExistente = conexionBD.selectOne("cliente.idCliente", idCliente);
-                if(clienteExistente!=null){
-                    int numeroFilasAfectadas = conexionBD.delete("cliente.eliminarCliente", idCliente);
-                    conexionBD.commit();
-                    if(numeroFilasAfectadas > 0){
-                        mensaje.setError(false);
-                        mensaje.setMensaje("Cuenta eliminada con exito");
-                    }else{
-                        mensaje.setMensaje("Lo sentimos, no se pudo eliminar tu cuenta, intentalo mas tarde");
-                    }
-                }else{
+        mensaje.setMensaje("No se pudo establecer conexión con la base de datos." );
+    }
+
+    return mensaje;
+}
+public static Mensaje eliminarCliente(Integer idCliente) {
+    SqlSession conexionBD = MyBatisUtil.obtenerConexion();
+    Mensaje mensaje = new Mensaje();
+
+    if (conexionBD != null) {
+        try {
+            Cliente clienteExistente = conexionBD.selectOne("cliente.idCliente", idCliente);
+            if(clienteExistente!=null){
+            conexionBD.getConnection().setAutoCommit(false);
+            conexionBD.delete("cliente.eliminarDirecciones", idCliente);
+
+            // Eliminar el cliente
+            int filasEliminadas = conexionBD.delete("cliente.eliminarCliente", idCliente);
+
+            if (filasEliminadas > 0) {
+                mensaje.setError(false);
+                mensaje.setMensaje("Cliente y direcciones eliminados correctamente.");
+            } else {
+                mensaje.setError(true);
+                mensaje.setMensaje("No se encontró un cliente con el ID proporcionado." + idCliente);
+            }
+            }else{
                     mensaje.setMensaje("No hay ninguna cuenta registrada en la base de datos con el ID que proporcionaste");
                 }
-            } catch (Exception e) {
-                mensaje.setMensaje("Error: " +e.getMessage());
-            }finally{
-                conexionBD.close();
-            }
-        }else{
-            mensaje.setMensaje("Lo sentimos, por el momento no hay conexion a la base de datos");
+
+            // Confirmar transacción
+            conexionBD.commit();
+        } catch (Exception e) {
+
         }
-        return mensaje;
         
+    } else {
+        mensaje.setError(true);
+        mensaje.setMensaje("No se pudo establecer conexión con la base de datos.");
     }
-       
+
+    return mensaje;
+}
    public static List<Cliente> buscarCliente(String nombre, String telefono, String correo) {
-    List<Cliente> cliente = null;
+    List<Cliente> clientes = null;
     SqlSession conexionBD = MyBatisUtil.obtenerConexion();
 
     if (conexionBD != null) {
@@ -125,10 +164,14 @@ public class ImpCliente {
             parametros.put("telefono", telefono);
             parametros.put("correo", correo);
 
-            cliente = conexionBD.selectList("cliente.buscarCliente", parametros);
-
+            clientes = conexionBD.selectList("cliente.buscarCliente", parametros);
+            
+            for (Cliente cliente : clientes) {
+                List<Direccion> direcciones = conexionBD.selectList("cliente.obtenerDireccionesPorCliente", cliente.getIdCliente());
+                cliente.setDirecciones(direcciones);  // Asignar las direcciones al cliente
+            }
         } catch (Exception e) {
-            System.err.println("Error al buscar cliente: " + e.getMessage());
+            System.err.println("Error al buscar colaboradores: " + e.getMessage());
         } finally {
             conexionBD.close();
         }
@@ -136,6 +179,16 @@ public class ImpCliente {
         System.err.println("No se pudo establecer conexión con la base de datos.");
     }
 
-    return cliente;
+    return clientes;
 }
+
+
+
+/*            // Obtener las direcciones de cada cliente
+            for (Cliente cliente : clientes) {
+                List<Direccion> direcciones = conexionBD.selectList("cliente.obtenerDireccionesPorCliente", cliente.getIdCliente());
+                cliente.setDirecciones(direcciones);  // Asignar las direcciones al cliente
+            }*/
+
+       
 }

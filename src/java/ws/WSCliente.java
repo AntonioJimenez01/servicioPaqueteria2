@@ -8,16 +8,19 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import static javax.ws.rs.client.Entity.json;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import pojo.Cliente;
+import pojo.Direccion;
 import pojo.Mensaje;
 
 @Path("cliente")
@@ -41,61 +44,66 @@ public class WSCliente {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Mensaje registrarCliente(String jsonCliente) {
+     Gson gson = new Gson();
+        Mensaje mensaje = new Mensaje();
         try {
-            Gson gson = new Gson();
+            // Deserializar JSON en objetos Cliente y Direccion
             Cliente cliente = gson.fromJson(jsonCliente, Cliente.class);
-            if (cliente.getCorreo() != null && !cliente.getCorreo().isEmpty()
-                && cliente.getCorreo().matches("^[A-Za-z0-9+_.-]+@(.+)$")
-                && cliente.getTelefono() != null && cliente.getTelefono().matches("^\\d{10}$")
-                && cliente.getNombre() != null && !cliente.getNombre().isEmpty()
-                && cliente.getNombre().length() <= 50) {
-                return ImpCliente.registrarCliente(cliente);
-            } else {
-                return new Mensaje(true, "Correo, teléfono, nombre o contraseña faltantes o inválidos");
-            }
+            Direccion direccion = cliente.getDireccion();
+            // Registrar cliente y dirección
+            mensaje = ImpCliente.registrarCliente(cliente, direccion);
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new BadRequestException();
+            mensaje.setError(false);
+            mensaje.setMensaje("Error al procesar la solicitud: " + e.getMessage());
         }
-    }
 
-
-    @POST
-    @Path("modificarClientes")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Mensaje modificarCliente(String jsonCliente) {
-        Gson gson = new Gson();
-        Cliente cliente = gson.fromJson(jsonCliente, Cliente.class);
-        if (cliente != null && cliente.getIdCliente() != null) {
-            return ImpCliente.editarCliente(cliente);
-        } else {
-            throw new WebApplicationException(Response.Status.BAD_REQUEST);
-        }
-    }
-
-    @Path("eliminarCliente")
-    @DELETE
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Mensaje eliminarCliente(Cliente cliente) {
-        Mensaje mensaje = null;
-        if (cliente.getIdCliente() != null) {
-            mensaje = ImpCliente.eliminarCliente(cliente.getIdCliente());
-        } else {
-            throw new WebApplicationException(Response.Status.BAD_REQUEST);
-        }
         return mensaje;
     }
-
-    @GET
-    @Path("buscarCliente")
+    
+    @Path("modificarCliente")
+    @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Cliente> buscarCliente(
-        @QueryParam("nombre") String nombre,
-        @QueryParam("telefono") String telefono,
-        @QueryParam("correo") String correo){
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Mensaje modificarCliente (String jsonCliente){
+            Gson gson = new Gson();
+    Mensaje mensaje = new Mensaje();
+    try {
+        // Deserializar JSON en objetos Cliente y Direcciones
+        Cliente cliente = gson.fromJson(jsonCliente, Cliente.class);
+        List<Direccion> direcciones = cliente.getDirecciones(); // Ahora es una lista de direcciones
 
-        return ImpCliente.buscarCliente(nombre, telefono, correo);
+        // Actualizar cliente y direcciones
+        mensaje = ImpCliente.actualizarCliente(cliente, direcciones);
+    } catch (Exception e) {
+        mensaje.setError(true);
+        mensaje.setMensaje("Error al procesar la solicitud: " + e.getMessage());
+        e.printStackTrace();
     }
+
+    return mensaje;
+    }
+    
+@Path("eliminarCliente")
+@DELETE
+@Produces(MediaType.APPLICATION_JSON)
+   public Mensaje eliminarColaborador(Cliente cliente) {
+        Mensaje mensaje = null;
+        if(cliente.getIdCliente()!=null){
+            mensaje = ImpCliente.eliminarCliente(cliente.getIdCliente());
+        }else{
+             throw new WebApplicationException(Response.Status.BAD_REQUEST);           
+        }
+        
+        return mensaje;
+    }
+   
+ @POST
+@Path("buscarCliente")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+public List<Cliente> buscarCliente(Cliente cliente) {
+    return ImpCliente.buscarCliente(cliente.getNombre(), cliente.getTelefono(), cliente.getCorreo());
+}
+
+
 }
