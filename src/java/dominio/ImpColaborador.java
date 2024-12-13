@@ -7,9 +7,9 @@ import mybatis.MyBatisUtil;
 import org.apache.ibatis.session.SqlSession;
 import pojo.Colaborador;
 import pojo.Mensaje;
+import pojo.Rol;
 
 public class ImpColaborador {
-
 
     public static List<Colaborador> obtenerTodosLosColaboradores() {
         List<Colaborador> colaboradores = null;
@@ -27,48 +27,52 @@ public class ImpColaborador {
         }
         return colaboradores;
     }
-    public static Colaborador obtenerColaboradorPorNoPersonal(String noPersonal) {
-        Colaborador colaborador = null;
-        SqlSession conexionBD = MyBatisUtil.obtenerConexion();
 
-        if (conexionBD != null) {
-            try {
-                HashMap<String, String> parametros = new LinkedHashMap<>();
-                parametros.put("noPersonal", noPersonal);
-                colaborador = conexionBD.selectOne("colaborador.colaboradorXnoPersonal", parametros);
-
-                if (colaborador != null) {
-                    System.out.println("Colaborador encontrado: " + colaborador.getNombre());
-                } else {
-                    System.out.println("Colaborador no encontrado para el NoPersonal: " + noPersonal);
-                }
-
-            } catch (Exception e) {
-                System.err.println("Error al obtener colaborador: " + e.getMessage());
-            } finally {
-                conexionBD.close();
-            }
-        } else {
-            System.err.println("No se pudo establecer conexión con la base de datos.");
-        }
-        return colaborador;
-    }
-    
     public static Mensaje registrarColaborador(Colaborador colaborador) {
         Mensaje msj = new Mensaje();
         SqlSession conexionBD = MyBatisUtil.obtenerConexion();
         if (conexionBD != null) {
             try {
+                Colaborador colaboradorPorCorreo = conexionBD.selectOne("colaborador.obtenerColaboradorPorCorreo", colaborador.getCorreo());
+                if (colaboradorPorCorreo != null) {
+                    msj.setError(true);
+                    msj.setMensaje("El correo ya está registrado.");
+                    return msj;
+                }
+                Colaborador colaboradorPorCURP = conexionBD.selectOne("colaborador.obtenerColaboradorPorCURP", colaborador.getCurp());
+                if (colaboradorPorCURP != null) {
+                    msj.setError(true);
+                    msj.setMensaje("La CURP ya está registrada.");
+                    return msj;
+                }
+                Colaborador colaboradorPorNumeroPersonal = conexionBD.selectOne("colaborador.obtenerColaboradorPorNumeroPersonal", colaborador.getNumeroPersonal());
+                if (colaboradorPorNumeroPersonal != null) {
+                    msj.setError(true);
+                    msj.setMensaje("El número de personal ya está registrado.");
+                    return msj;
+                }
+                if (colaborador.getNumeroLicencia() != null && !colaborador.getNumeroLicencia().isEmpty()) {
+                    try {
+                        Colaborador colaboradorPorNumeroLicencia = conexionBD.selectOne("colaborador.obtenerColaboradorPorNumeroLicencia", colaborador.getNumeroLicencia());
+                        if (colaboradorPorNumeroLicencia != null) {
+                            msj.setError(true);
+                            msj.setMensaje("El número de licencia ya está registrado.");
+                            return msj;
+                        }
+                    } catch (Exception e) {
+                        msj.setError(true);
+                        msj.setMensaje("Error al validar el número de licencia: " + e.getMessage());
+                        return msj;
+                    }
+                }
                 int filasAfectadas = conexionBD.insert("colaborador.registrarColaborador", colaborador);
                 conexionBD.commit();
                 if (filasAfectadas > 0) {
                     msj.setError(false);
-                    msj.setMensaje("El Colaborador " + colaborador.getNombre() + " " +
-                            colaborador.getApellidoPaterno() + " " + colaborador.getApellidoMaterno() +
-                            ", fue registrado con éxito.");
+                    msj.setMensaje("El colaborador se registró con éxito.");
                 } else {
                     msj.setError(true);
-                    msj.setMensaje("La información del colaborador no se pudo ser registrado. :c");
+                    msj.setMensaje("No se pudo registrar el colaborador.");
                 }
             } catch (Exception e) {
                 msj.setError(true);
@@ -80,19 +84,25 @@ public class ImpColaborador {
         }
         return msj;
     }
-    
-        public static Mensaje editarColaborador(Colaborador colaborador) {
+
+    public static Mensaje editarColaborador(Colaborador colaborador) {
         Mensaje msj = new Mensaje();
         SqlSession conexionBD = MyBatisUtil.obtenerConexion();
 
         if (conexionBD != null) {
             try {
+
+                if (colaborador.getNombre() == null || colaborador.getNombre().isEmpty()) {
+                    msj.setError(true);
+                    msj.setMensaje("El nombre del colaborador no puede estar vacío.");
+                    return msj;
+                }
+                
                 int filasAfectadas = conexionBD.update("colaborador.editarColaborador", colaborador);
                 conexionBD.commit();
-
                 if (filasAfectadas > 0) {
                     msj.setError(false);
-                    msj.setMensaje("El colaborador con el ID " + colaborador.getIdColaborador()+ " fue actualizado con éxito.");
+                    msj.setMensaje("El colaborador con el ID " + colaborador.getIdColaborador() + " fue actualizado con éxito.");
                 } else {
                     msj.setError(true);
                     msj.setMensaje("No se encontró el colaborador o no se pudo actualizar.");
@@ -107,65 +117,49 @@ public class ImpColaborador {
             msj.setError(true);
             msj.setMensaje("No se pudo establecer la conexión con la base de datos.");
         }
-
         return msj;
     }
-        
-       public static Mensaje eliminarColaborador (Integer idColaborador){
+
+    public static Mensaje eliminarColaborador(Integer idColaborador) {
         Mensaje mensaje = new Mensaje();
         mensaje.setError(true);
         SqlSession conexionBD = MyBatisUtil.obtenerConexion();
-        if(conexionBD!=null){
+        if (conexionBD != null) {
             try {
                 Colaborador colaboradorExistente = conexionBD.selectOne("colaborador.idColaborador", idColaborador);
-                if(colaboradorExistente!=null){
+                if (colaboradorExistente != null) {
                     int numeroFilasAfectadas = conexionBD.delete("colaborador.eliminarColaborador", idColaborador);
                     conexionBD.commit();
-                    if(numeroFilasAfectadas > 0){
+                    if (numeroFilasAfectadas > 0) {
                         mensaje.setError(false);
-                        mensaje.setMensaje("Cuenta eliminada con exito");
-                    }else{
-                        mensaje.setMensaje("Lo sentimos, no se pudo eliminar tu cuenta, intentalo mas tarde");
+                        mensaje.setMensaje("Cuenta eliminada con éxito.");
+                    } else {
+                        mensaje.setMensaje("Lo sentimos, no se pudo eliminar tu cuenta, inténtalo más tarde.");
                     }
-                }else{
-                    mensaje.setMensaje("No hay ninguna cuenta registrada en la base de datos con el ID que proporcionaste");
+                } else {
+                    mensaje.setMensaje("No hay ninguna cuenta registrada en la base de datos con el ID que proporcionaste.");
                 }
             } catch (Exception e) {
-                mensaje.setMensaje("Error: " +e.getMessage());
-            }finally{
+                mensaje.setMensaje("Error: " + e.getMessage());
+            } finally {
                 conexionBD.close();
             }
-        }else{
-            mensaje.setMensaje("Lo sentimos, por el momento no hay conexion a la base de datos");
+        } else {
+            mensaje.setMensaje("Lo sentimos, por el momento no hay conexión a la base de datos.");
         }
         return mensaje;
-        
     }
-       
-   public static List<Colaborador> buscarColaborador(String nombre, String numeroPersonal, String rol) {
-    List<Colaborador> colaboradores = null;
-    SqlSession conexionBD = MyBatisUtil.obtenerConexion();
 
-    if (conexionBD != null) {
-        try {
-            HashMap<String, Object> parametros = new HashMap<>();
-            parametros.put("nombre", nombre);
-            parametros.put("numeroPersonal", numeroPersonal);
-            parametros.put("rol", rol);
-
-            colaboradores = conexionBD.selectList("colaborador.buscarColaborador", parametros);
-
-        } catch (Exception e) {
-            System.err.println("Error al buscar colaboradores: " + e.getMessage());
-        } finally {
-            conexionBD.close();
+    public static List<Rol> obtenerRoles() {
+        List<Rol> roles = null;
+        SqlSession conexionBD = MyBatisUtil.obtenerConexion();
+        if (conexionBD != null) {
+            try {
+                roles = conexionBD.selectList("colaborador.obtenerRoles");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-    } else {
-        System.err.println("No se pudo establecer conexión con la base de datos.");
+        return roles;
     }
-
-    return colaboradores;
-}
-
-   
 }

@@ -14,7 +14,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
-import static javax.ws.rs.client.Entity.json;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -25,6 +24,7 @@ import pojo.Mensaje;
 
 @Path("cliente")
 public class WSCliente {
+
     @Context
     private UriInfo context;
 
@@ -38,72 +38,53 @@ public class WSCliente {
         return ImpCliente.obtenerTodosLosClientes();
     }
 
-
     @Path("registroCliente")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Mensaje registrarCliente(String jsonCliente) {
-     Gson gson = new Gson();
+        Gson gson = new Gson();
         Mensaje mensaje = new Mensaje();
         try {
-            // Deserializar JSON en objetos Cliente y Direccion
             Cliente cliente = gson.fromJson(jsonCliente, Cliente.class);
             Direccion direccion = cliente.getDireccion();
-            // Registrar cliente y dirección
             mensaje = ImpCliente.registrarCliente(cliente, direccion);
         } catch (Exception e) {
             mensaje.setError(false);
             mensaje.setMensaje("Error al procesar la solicitud: " + e.getMessage());
         }
-
         return mensaje;
     }
-    
+
     @Path("modificarCliente")
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Mensaje modificarCliente (String jsonCliente){
-            Gson gson = new Gson();
-    Mensaje mensaje = new Mensaje();
-    try {
-        // Deserializar JSON en objetos Cliente y Direcciones
-        Cliente cliente = gson.fromJson(jsonCliente, Cliente.class);
-        List<Direccion> direcciones = cliente.getDirecciones(); // Ahora es una lista de direcciones
-
-        // Actualizar cliente y direcciones
-        mensaje = ImpCliente.actualizarCliente(cliente, direcciones);
-    } catch (Exception e) {
-        mensaje.setError(true);
-        mensaje.setMensaje("Error al procesar la solicitud: " + e.getMessage());
-        e.printStackTrace();
-    }
-
-    return mensaje;
-    }
-    
-@Path("eliminarCliente")
-@DELETE
-@Produces(MediaType.APPLICATION_JSON)
-   public Mensaje eliminarColaborador(Cliente cliente) {
-        Mensaje mensaje = null;
-        if(cliente.getIdCliente()!=null){
-            mensaje = ImpCliente.eliminarCliente(cliente.getIdCliente());
-        }else{
-             throw new WebApplicationException(Response.Status.BAD_REQUEST);           
+    public Mensaje modificarCliente(String jsonCliente) {
+        Gson gson = new Gson();
+        Mensaje mensaje = new Mensaje();
+        try {
+            Cliente cliente = gson.fromJson(jsonCliente, Cliente.class);
+            List<Direccion> direcciones = cliente.getDirecciones();
+            mensaje = ImpCliente.actualizarCliente(cliente, direcciones);
+        } catch (Exception e) {
+            mensaje.setError(true);
+            mensaje.setMensaje("Error al procesar la solicitud: " + e.getMessage());
+            e.printStackTrace();
         }
-        
         return mensaje;
     }
-   
- @POST
-@Path("buscarCliente")
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON)
-public List<Cliente> buscarCliente(Cliente cliente) {
-    return ImpCliente.buscarCliente(cliente.getNombre(), cliente.getTelefono(), cliente.getCorreo());
-}
 
-
+    @Path("eliminarCliente")
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    public Mensaje eliminarColaborador(Cliente cliente) {
+        Mensaje mensaje = null;
+        if (cliente.getIdCliente() != null) {
+            mensaje = ImpCliente.eliminarCliente(cliente.getIdCliente());
+        } else {
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        }
+        return mensaje;
+    }
 }

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="direccion">
+    
+    <select id="obtenerCliente" resultType="pojo.Cliente">
+        SELECT c.idCliente, c.nombre, c.apellidoPaterno, c.apellidoMaterno, c.telefono, c.correo, 
+        d.idDireccion, d.calle, d.colonia
+        FROM direccion d
+        INNER JOIN cliente c ON d.idCliente = c.idCliente
+        WHERE d.idCliente = #{idCliente}
+    </select>
+    
+    <insert id="registrarCliente" parameterType="pojo.Direccion">
+        
+    </insert>
+    
+    
+
+</mapper>

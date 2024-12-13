@@ -1,25 +1,29 @@
 package pojo;
 
+
 public class Mensaje {
-    
-    private Boolean error;
+    private boolean error;
     private String mensaje;
-    private Colaborador colaborador;
+    private boolean bandera;
 
     public Mensaje() {
     }
 
-    public Mensaje(Boolean error, String mensaje) {
+    public Mensaje(boolean error, String mensaje, boolean bandera) {
         this.error = error;
         this.mensaje = mensaje;
-        //this.colaborador = colaborador;
+        this.bandera = bandera;
     }
 
-    public Boolean getError() {
+    public Mensaje(boolean b, String datos_del_paquete_faltantes_o_incorrectos) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public boolean isError() {
         return error;
     }
 
-    public void setError(Boolean error) {
+    public void setError(boolean error) {
         this.error = error;
     }
 
@@ -31,14 +35,14 @@ public class Mensaje {
         this.mensaje = mensaje;
     }
 
-    public Colaborador getColaborador() {
-        return colaborador;
+    public boolean isBandera() {
+        return bandera;
     }
 
-    public void setColaborador(Colaborador colaborador) {
-        this.colaborador = colaborador;
+    public void setBandera(boolean bandera) {
+        this.bandera = bandera;
     }
 
-        
+    
     
 }

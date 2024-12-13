@@ -79,4 +79,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         AND (#{correo} IS NULL OR c.correo LIKE CONCAT('%', #{correo}, '%'))
 </select>
 
+<select id="obtenerClientePorTelefono" resultType="pojo.Cliente">
+        SELECT telefono FROM cliente WHERE telefono = #{telefono}
+    </select>
+    
+    <select id="obtenerClientePorCorreo" resultType="pojo.Cliente">
+        SELECT correo FROM cliente WHERE correo = #{correo}
+    </select>
+
 </mapper>
