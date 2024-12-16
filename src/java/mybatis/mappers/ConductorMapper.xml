@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="conductor">
+
+    <update id="asignarUnidad" parameterType="map">        
+        UPDATE unidad u
+        JOIN colaborador c ON c.noPersonal = #{noPersonal}
+        SET u.idColaborador = c.idColaborador
+        WHERE u.numeroInterno = #{numeroInterno} 
+        AND u.situacion = 'activo';
+    </update>
+    
+    <update id="desasignarUnidad" parameterType="int">        
+        UPDATE unidad
+        SET idColaborador = NULL
+        WHERE idColaborador IN (
+            SELECT idColaborador
+            FROM colaborador
+        WHERE noPersonal = #{noPersonal}
+        );
+
+    </update>
+    
+    <select id="obtenerUnidadColaborador" parameterType="int" resultType="pojo.Unidad">
+        SELECT c.idColaborador, c.nombre
+        FROM colaborador c
+        JOIN unidad u ON c.idColaborador = u.idColaborador
+        WHERE c.idColaborador = #{idColaborador};
+    </select>
+    
+    <select id="verListaEnvios" parameterType="String" resultType="pojo.Envio">
+        SELECT
+            e.numeroGuia            
+        FROM
+            envio e
+        INNER JOIN
+            colaborador c ON e.idColaborador = c.idColaborador
+        WHERE
+            c.noPersonal = #{noPersonal}
+    </select>
+    
+    <select id="verDetalleEnvio" parameterType="map" resultType="pojo.Envio">
+        SELECT
+            e.numeroGuia,
+            e.costoEnvio,
+            e.comentario,
+            e.idColaborador,
+            e.idCliente,
+            e.idSeguimiento,
+            e.idDireccion
+        FROM
+            envio e       
+        WHERE
+            e.numeroGuia = #{numeroGuia} and e.idColaborador = #{idColaborador}
+    </select>
+    <update id="actualizarEstatus" parameterType="map">
+        UPDATE seguimiento
+        SET nombre = #{nombre}, 
+            fecha = #{fecha}, 
+            hora = #{hora},
+            idColaborador = #{idColaborador}           
+        WHERE idSeguimiento = #{idSeguimiento}
+    </update>
+    
+     <select id="verificarUnidadUso" resultType="pojo.Unidad" parameterType="pojo.Colaborador">
+        SELECT u.numeroInterno, c.noPersonal FROM unidad u 
+        INNER JOIN
+         colaborador c ON u.idColaborador = c.idColaborador 
+        WHERE noPersonal = #{noPersonal}
+    </select>
+</mapper>

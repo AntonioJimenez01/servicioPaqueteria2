@@ -5,7 +5,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 <mapper namespace="colaborador">
     <select id="obtenerColaborador" resultType="pojo.Colaborador">
-        SELECT c.idColaborador, c.nombre, c.apellidoPaterno, c.apellidoMaterno, c.numeroPersonal, c.correo, c.curp, c.idRol, c.numeroLicencia, c.contraseña, r.nombre AS rol 
+        SELECT c.idColaborador, c.nombre, c.apellidoPaterno, c.apellidoMaterno, c.noPersonal, c.correo, c.curp, c.idRol, c.numeroLicencia, c.contraseña, r.nombre AS rol 
         FROM colaborador c 
         JOIN rol r ON c.idRol = r.idRol ;
     </select>
@@ -17,9 +17,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     
     <insert id ="registrarColaborador" parameterType="pojo.Colaborador">
         INSERT INTO colaborador (nombre, apellidoPaterno, apellidoMaterno, 
-        numeroPersonal, correo, curp, contraseña, idRol, numeroLicencia)
+        noPersonal, correo, curp, contraseña, idRol, numeroLicencia)
         VALUES (#{nombre}, #{apellidoPaterno}, #{apellidoMaterno}, 
-        #{numeroPersonal}, #{correo}, #{curp}, #{contraseña}, #{idRol}, #{numeroLicencia}) 
+        #{noPersonal}, #{correo}, #{curp}, #{contraseña}, #{idRol}, #{numeroLicencia}) 
     </insert>
     
     <update id="editarColaborador" parameterType="pojo.Colaborador"> 
@@ -45,19 +45,41 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
     
     <select id="obtenerColaboradorPorCorreo" resultType="pojo.Colaborador">
-        SELECT * FROM colaborador WHERE correo = #{correo}
+        SELECT correo FROM colaborador WHERE correo = #{correo}
     </select>
 
     <select id="obtenerColaboradorPorCURP" resultType="pojo.Colaborador">
-        SELECT * FROM colaborador WHERE curp = #{curp}
+        SELECT curp FROM colaborador WHERE curp = #{curp}
     </select>
     
     <select id="obtenerColaboradorPorNumeroPersonal" resultType="pojo.Colaborador">
-        SELECT * FROM colaborador WHERE numeroPersonal = #{numeroPersonal}
+        SELECT noPersonal FROM colaborador WHERE noPersonal = #{noPersonal}
     </select>
 
     <select id="obtenerColaboradorPorNumeroLicencia" resultType="pojo.Colaborador">
-        SELECT * FROM colaborador WHERE numeroLicencia = #{numeroLicencia}
+        SELECT numeroLicencia FROM colaborador WHERE numeroLicencia = #{numeroLicencia}
+    </select>
+    
+    <update id="guardarFoto" parameterType="map">
+        UPDATE colaborador
+        SET fotografia = #{fotografia}
+        WHERE idColaborador = #{idColaborador}
+    </update>
+    
+    <select id="obtenerFoto" parameterType="int" resultType="pojo.Colaborador">
+        SELECT TO_BASE64(fotografia) AS fotoBase64
+        FROM colaborador
+        WHERE idColaborador = #{idColaborador}
+    </select>
+    
+    <select id="obtenerConductores" resultType="pojo.Colaborador">
+        SELECT 
+            c.idColaborador,
+            c.noPersonal,
+            c.nombre
+        FROM colaborador c
+        JOIN rol r ON c.idRol = r.idRol
+        WHERE r.nombre = 'Conductor'
     </select>
     
 </mapper>

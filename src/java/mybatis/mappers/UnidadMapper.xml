@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="unidad">
+
+    <select id="conectar" resultType="pojo.Colaborador" parameterType="int">        
+        SELECT nombre
+        FROM colaborador
+        WHERE noPersonal = #{noPersonal}
+    </select>
+    
+    <select id="obtenerUnidades" resultType="pojo.Unidad">        
+       SELECT 
+            u.idUnidad, 
+            u.marca, 
+            u.modelo, 
+             u.año, 
+    u.vin, 
+    u.numeroInterno, 
+    u.situacion, 
+    u.motivo, 
+    u.idColaborador, 
+    u.tipoUnidad,
+    IFNULL(c.nombre, 'Disponible') AS nombre,
+    IFNULL(c.noPersonal, 'No Asignado') AS noPersonal
+FROM 
+    unidad u
+LEFT JOIN 
+    colaborador c ON u.idColaborador = c.idColaborador
+        
+    </select>
+    
+    <insert id="registrarUnidad" parameterType="pojo.Unidad">
+        INSERT INTO unidad (marca, modelo, año, vin, numeroInterno, situacion, tipoUnidad)
+        VALUES (#{marca}, #{modelo}, #{año}, #{vin}, #{numeroInterno}, #{situacion}, #{tipoUnidad})
+    </insert>
+    
+    <update id="modificarUnidad" parameterType="pojo.Unidad">
+        UPDATE unidad
+        SET marca = #{marca}, 
+            modelo = #{modelo}, 
+            año = #{año},
+            vin = #{vin},
+            numeroInterno = #{numeroInterno},
+            situacion = #{situacion},
+            tipoUnidad = #{tipoUnidad}
+        WHERE idUnidad = #{idUnidad}
+    </update>
+    
+    <select id="obtenerUnidad" resultType="pojo.Unidad" parameterType="map">        
+        SELECT 
+            idUnidad, 
+            marca, 
+            modelo, 
+            año, 
+            vin, 
+            numeroInterno, 
+            situacion, 
+            motivo, 
+            idColaborador, 
+            tipoUnidad
+        FROM unidad
+        <where>
+            <!-- Condición para buscar por VIN -->
+            <if test="vin != null and vin != ''">
+                vin = #{vin}
+            </if>
+            <!-- Condición para buscar por Marca -->
+            <if test="marca != null and marca != ''">
+                AND marca LIKE CONCAT('%', #{marca}, '%')
+            </if>
+            <!-- Condición para buscar por Número Interno -->
+            <if test="numeroInterno != null and numeroInterno != ''">
+                AND numeroInterno = #{numeroInterno}
+            </if>
+        </where>
+    </select>
+    
+    <update id="darBajaUnidad" parameterType="pojo.Unidad">
+        UPDATE unidad
+        SET situacion = #{situacion},
+            motivo = #{motivo}
+        WHERE idUnidad = #{idUnidad}
+    </update>
+    
+     <select id="verificarVin" resultType="int" parameterType="pojo.Unidad">
+        SELECT COUNT(*)
+        FROM unidad
+        WHERE vin = #{vin}
+    </select>    
+
+</mapper>

@@ -85,12 +85,7 @@ public class ImpCliente {
 
         if (conexionBD != null) {
             try {
-                Cliente clientePorTelefono = conexionBD.selectOne("cliente.obtenerClientePorTelefono", cliente.getTelefono());
-                if (clientePorTelefono != null && clientePorTelefono.getIdCliente() != cliente.getIdCliente()) {
-                    mensaje.setError(true);
-                    mensaje.setMensaje("El número de teléfono ya fue registrado");
-                    return mensaje;
-                }
+               
 
                 conexionBD.update("cliente.actualizarCliente", cliente);
 

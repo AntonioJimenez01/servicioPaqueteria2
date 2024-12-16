@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="sesion">
+    <select id= "loginColaborador" resultType="pojo.Colaborador">
+        SELECT idColaborador, colaborador.nombre, apellidoPaterno, apellidoMaterno, curp, correo, noPersonal, colaborador.idRol, rol.nombre AS 'nombreRol',
+        CASE
+            WHEN colaborador.idRol = 3 THEN colaborador.numeroLicencia 
+            ELSE NULL 
+        END AS numeroLicencia
+        FROM colaborador 
+        INNER JOIN rol ON colaborador.idRol = rol.idRol
+        WHERE noPersonal = #{noPersonal} AND contraseña = #{contraseña}
+    </select>
+    
+    
+</mapper>

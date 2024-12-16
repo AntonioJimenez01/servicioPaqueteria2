@@ -10,7 +10,7 @@ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
             <transactionManager type="JDBC"/>
             <dataSource type="POOLED" >
                 <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
-                <property name="url" value="jdbc:mysql://localhost:3306/paqueteria?serverTimezone=UTC"/>   
+                <property name="url" value="jdbc:mysql://localhost:3306/paqueteria2?serverTimezone=UTC"/>   
                 <property name="username" value="anton"/>    
                 <property name="password" value="123456789"/>
                 <property name="poolMaximumActiveConnections" value="50"/>
@@ -18,8 +18,13 @@ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
         </environment>
     </environments>
     <mappers>
+        <mapper resource="mybatis/mappers/ConductorMapper.xml"/>
+        <mapper resource="mybatis/mappers/EnvioMapper.xml"/>
         <mapper resource="mybatis/mappers/ColaboradoresMapper.xml" />
         <mapper resource="mybatis/mappers/ClientesMapper.xml" />
+        <mapper resource="mybatis/mappers/LoginMapper.xml" />
+        <mapper resource="mybatis/mappers/PaquetesMapper.xml" />
+        <mapper resource="mybatis/mappers/UnidadMapper.xml" />
     </mappers>
 
 </configuration>

@@ -4,7 +4,7 @@ public class Colaborador {
     private String nombre;
     private String apellidoPaterno;
     private String apellidoMaterno;
-    private String numeroPersonal;
+    private String noPersonal;
     private String correo;
     private String curp;
     private String contraseña;
@@ -18,12 +18,12 @@ public class Colaborador {
 
     
     
-    public Colaborador(Integer idColaborador, String nombre, String apellidoPaterno, String apellidoMaterno, String numeroPersonal, String correo, String curp, String contraseña, Integer idRol, String rol, String numeroLicencia, String fotoBase64) {
+    public Colaborador(Integer idColaborador, String nombre, String apellidoPaterno, String apellidoMaterno, String noPersonal, String correo, String curp, String contraseña, Integer idRol, String rol, String numeroLicencia, String fotoBase64) {
         this.idColaborador = idColaborador;
         this.nombre = nombre;
         this.apellidoPaterno = apellidoPaterno;
         this.apellidoMaterno = apellidoMaterno;
-        this.numeroPersonal = numeroPersonal;
+        this.noPersonal = noPersonal;
         this.correo = correo;
         this.curp = curp;
         this.contraseña = contraseña;
@@ -65,12 +65,12 @@ public class Colaborador {
         this.apellidoMaterno = apellidoMaterno;
     }
 
-    public String getNumeroPersonal() {
-        return numeroPersonal;
+    public String getNoPersonal() {
+        return noPersonal;
     }
 
-    public void setNumeroPersonal(String numeroPersonal) {
-        this.numeroPersonal = numeroPersonal;
+    public void setNoPersonal(String noPersonal) {
+        this.noPersonal = noPersonal;
     }
 
     public String getCorreo() {
@@ -128,6 +128,8 @@ public class Colaborador {
     public void setFotoBase64(String fotoBase64) {
         this.fotoBase64 = fotoBase64;
     }
+
+   
 
     
     

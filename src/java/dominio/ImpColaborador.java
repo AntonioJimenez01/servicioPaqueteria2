@@ -13,6 +13,7 @@ public class ImpColaborador {
 
     public static List<Colaborador> obtenerTodosLosColaboradores() {
         List<Colaborador> colaboradores = null;
+        Mensaje msj = null;
         SqlSession conexionBD = MyBatisUtil.obtenerConexion();
         if (conexionBD != null) {
             try {
@@ -24,6 +25,7 @@ public class ImpColaborador {
             }
         } else {
             System.out.println("No se pudo establecer la conexión con la base de datos.");
+            
         }
         return colaboradores;
     }
@@ -45,7 +47,7 @@ public class ImpColaborador {
                     msj.setMensaje("La CURP ya está registrada.");
                     return msj;
                 }
-                Colaborador colaboradorPorNumeroPersonal = conexionBD.selectOne("colaborador.obtenerColaboradorPorNumeroPersonal", colaborador.getNumeroPersonal());
+                Colaborador colaboradorPorNumeroPersonal = conexionBD.selectOne("colaborador.obtenerColaboradorPorNumeroPersonal", colaborador.getNoPersonal());
                 if (colaboradorPorNumeroPersonal != null) {
                     msj.setError(true);
                     msj.setMensaje("El número de personal ya está registrado.");
@@ -161,5 +163,65 @@ public class ImpColaborador {
             }
         }
         return roles;
+    }
+    
+    public static Mensaje guardarFoto(Integer idColaborador, byte[] fotografia){
+        Mensaje respuesta = new Mensaje();
+        SqlSession conexionBD = MyBatisUtil.obtenerConexion();
+        if(conexionBD != null){
+            try{
+                HashMap<String, Object> parametros = new HashMap<>();
+                parametros.put("idColaborador",idColaborador);
+                parametros.put("fotografia", fotografia);
+                int filasAfectadas = conexionBD.update("colaborador.guardarFoto",parametros);
+                conexionBD.commit();
+                if (filasAfectadas>0){
+                    respuesta.setError((false));
+                    respuesta.setMensaje("Fotografía del colaborador guardada correctamente. ");
+                }else{
+                    respuesta.setError(true);
+                    respuesta.setMensaje("Los sentimos, no se pudo guardar la fotografía del colaborador");
+                }
+                conexionBD.close();
+            }catch (Exception e){
+                respuesta.setError(true);
+                respuesta.setMensaje(e.getMessage());
+            }
+        }else{
+            respuesta.setError(true);
+            respuesta.setMensaje("Los senitmos por el momento no hay conexion al almacenamiento de la base de datos" );
+        }
+        return respuesta;
+    }
+    
+    public static Colaborador obtenerFoto(Integer idColaborador){
+        Colaborador cliente = null;
+        SqlSession conexionBD = MyBatisUtil.obtenerConexion();
+        if (conexionBD != null){
+            try{
+                cliente = conexionBD.selectOne("colaborador.obtenerFoto", idColaborador);
+                conexionBD.close();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+        return cliente;
+    }
+    
+    public static List<Colaborador> obtenerTodosLosConductores() {
+        List<Colaborador> colaboradores = null;
+        SqlSession conexionBD = MyBatisUtil.obtenerConexion();
+        if (conexionBD != null) {
+            try {
+                colaboradores = conexionBD.selectList("colaborador.obtenerConductores");
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                conexionBD.close();
+            }
+        } else {
+            System.out.println("No se pudo establecer la conexión con la base de datos.");
+        }
+        return colaboradores;
     }
 }

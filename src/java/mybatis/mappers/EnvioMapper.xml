@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="envio">
+
+    <insert id="registrarDireccion" parameterType="hashmap">
+        INSERT INTO direccion (tipo, calle, numero, colonia, codigoPostal, ciudad, estado, idEnvio)
+        VALUES (#{tipo}, #{calle}, #{numero}, #{colonia}, #{codigoPostal}, #{ciudad}, #{estado}, #{idEnvio})
+    </insert>
+    <!-- Registrar un envío -->
+    <insert id="registrarEnvio" parameterType="pojo.Envio" useGeneratedKeys="true" keyProperty="idEnvio">
+        INSERT INTO envio (numeroGuia, costoEnvio, comentario, idColaborador, idCliente, idSeguimiento)
+        VALUES (#{numeroGuia}, #{costoEnvio}, #{comentario}, #{idColaborador}, #{idCliente}, #{idSeguimiento})
+    </insert>
+    
+    <insert id="registrarSeguimiento" parameterType="map">
+        INSERT INTO seguimiento (nombre, fecha, hora, idColaborador, idEnvio)
+        VALUES (#{nombre}, #{fecha}, #{hora}, #{idColaborador}, #{idEnvio})
+    </insert>
+    
+    <select id="verificarNumeroGuia" resultType="string">
+        SELECT numeroGuia FROM envio WHERE numeroGuia = #{numeroGuia}
+    </select>
+    
+    <update id="actualizarEnvio" parameterType="map"> 
+        UPDATE envio
+        SET idCliente = #{idCliente}, 
+            idColaborador = #{idColaborador}, 
+            comentario = #{comentario},
+            costoEnvio = #{costoEnvio}            
+        WHERE idEnvio = #{idEnvio}
+    </update>
+    
+    <update id="actualizarDireccion" parameterType="map"> 
+        UPDATE direccion
+        SET calle = #{calle}, 
+            numero = #{numero}, 
+            colonia = #{colonia}, 
+            codigoPostal = #{codigoPostal}, 
+            ciudad = #{ciudad}, 
+            estado = #{estado}
+        WHERE idEnvio = #{idEnvio}
+    </update>
+    
+   <select id="consultarEnvio" resultType="pojo.ResultadoObtenerEnvio" parameterType="string">
+        SELECT 
+            e.idEnvio,   
+            e.idColaborador, 
+            e.idCliente,
+            d_origen.idDireccion AS idDireccionOrigen, 
+            d_origen.tipo AS tipoOrigen, 
+            d_origen.calle AS calleOrigen, 
+            d_origen.numero AS numeroOrigen, 
+            d_origen.colonia AS coloniaOrigen, 
+            d_origen.codigoPostal AS codigoPostalOrigen, 
+            d_origen.ciudad AS ciudadOrigen, 
+            d_origen.estado AS estadoOrigen, 
+
+            d_destino.idDireccion AS idDireccionDestino, 
+            d_destino.tipo AS tipoDestino, 
+            d_destino.calle AS calleDestino, 
+            d_destino.numero AS numeroDestino, 
+            d_destino.colonia AS coloniaDestino, 
+            d_destino.codigoPostal AS codigoPostalDestino, 
+            d_destino.ciudad AS ciudadDestino, 
+            d_destino.estado AS estadoDestino,
+
+            c.idCliente AS idCliente, 
+            c.nombre AS nombreCliente
+
+        FROM 
+            envio e
+        INNER JOIN 
+            direccion d_origen ON d_origen.idEnvio = e.idEnvio AND d_origen.tipo = 'origen'
+        INNER JOIN 
+            direccion d_destino ON d_destino.idEnvio = e.idEnvio AND d_destino.tipo = 'destino'
+        INNER JOIN 
+            cliente c ON c.idCliente = e.idCliente
+        WHERE 
+            e.numeroGuia = #{numeroGuia}
+    </select>
+    
+    <select id="obtenerEnvios" resultType="pojo.ResultadoObtenerEnvio">
+        SELECT 
+            e.idEnvio,   
+            e.idColaborador, 
+            e.idCliente,
+            d_origen.idDireccion AS idDireccionOrigen, 
+            d_origen.tipo AS tipoOrigen, 
+            d_origen.calle AS calleOrigen, 
+            d_origen.numero AS numeroOrigen, 
+            d_origen.colonia AS coloniaOrigen, 
+            d_origen.codigoPostal AS codigoPostalOrigen, 
+            d_origen.ciudad AS ciudadOrigen, 
+            d_origen.estado AS estadoOrigen, 
+
+            d_destino.idDireccion AS idDireccionDestino, 
+            d_destino.tipo AS tipoDestino, 
+            d_destino.calle AS calleDestino, 
+            d_destino.numero AS numeroDestino, 
+            d_destino.colonia AS coloniaDestino, 
+            d_destino.codigoPostal AS codigoPostalDestino, 
+            d_destino.ciudad AS ciudadDestino, 
+            d_destino.estado AS estadoDestino,
+
+            c.idCliente AS idCliente, 
+            c.nombre AS nombreCliente,
+
+            co.nombre AS nombreColaborador,
+            co.idColaborador, 
+
+            s.idSeguimiento,
+            s.nombre AS nombreSeguimiento,
+        
+            (SELECT COUNT(*) FROM paquete p WHERE p.idEnvio = e.idEnvio) AS cantidadPaquetes
+
+        FROM 
+            envio e
+        INNER JOIN 
+            direccion d_origen ON d_origen.idEnvio = e.idEnvio AND d_origen.tipo = 'origen'
+        INNER JOIN 
+            direccion d_destino ON d_destino.idEnvio = e.idEnvio AND d_destino.tipo = 'destino'
+        INNER JOIN 
+            cliente c ON c.idCliente = e.idCliente     
+        INNER JOIN 
+            colaborador co ON co.idColaborador = e.idColaborador   
+        INNER JOIN 
+            seguimiento s ON s.idEnvio = e.idEnvio  
+          
+    </select>
+
+</mapper>

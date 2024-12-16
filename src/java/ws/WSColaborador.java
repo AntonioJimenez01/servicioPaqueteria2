@@ -45,15 +45,12 @@ public class WSColaborador {
             Gson gson = new Gson();
             Colaborador colaborador = gson.fromJson(jsonColaborador, Colaborador.class);
 
-            if (colaborador.getNumeroPersonal() == null || colaborador.getNumeroPersonal().isEmpty() ||
+            if (colaborador.getNoPersonal()== null || colaborador.getNoPersonal().isEmpty() ||
                 colaborador.getContraseña() == null || colaborador.getContraseña().isEmpty()) {
                 return new Mensaje(true, "Número de personal y/o contraseña faltantes o incorrectos");
             }
 
-            String curpRegex = "^[A-Z]{4}\\d{6}[HM]{1}[A-Z]{5}[0-9A-Z]{1}\\d{1}$";
-            if (colaborador.getCurp() == null || !colaborador.getCurp().matches(curpRegex)) {
-                return new Mensaje(true, "CURP incorrecta: debe seguir la nomenclatura oficial y contener 18 caracteres");
-            }
+
 
             String correoRegex = "^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$";
             if (colaborador.getCorreo() == null || !colaborador.getCorreo().matches(correoRegex)) {
@@ -99,5 +96,36 @@ public class WSColaborador {
     @Produces(MediaType.APPLICATION_JSON)
     public List<Rol> obtenerRoles() {
         return ImpColaborador.obtenerRoles();
+    }
+    
+    @Path("subirFoto/{idColaborador}")
+    @PUT
+    @Produces (MediaType.APPLICATION_JSON)
+    public Mensaje subirFoto(@PathParam("idColaborador") Integer idColaborador,
+            byte[] fotografia){
+
+        if (idColaborador != null && idColaborador > 0 && fotografia.length > 0){
+            return ImpColaborador.guardarFoto(idColaborador, fotografia);
+            
+        }
+        throw new BadRequestException();
+    }
+    
+    @GET
+    @Path ("obtenerFoto/{idColaborador}")
+    @Produces (MediaType.APPLICATION_JSON)
+    public Colaborador obtenerFoto(@PathParam("idColaborador") Integer idColaborador){
+        if(idColaborador != null && idColaborador >0){
+            return ImpColaborador.obtenerFoto(idColaborador);
+        }
+       throw new BadRequestException();
+    }
+    
+    @GET
+    @Path("obtenerConductores") 
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Colaborador> obtenerConductores() {
+ 
+        return ImpColaborador.obtenerTodosLosConductores();
     }
 }
